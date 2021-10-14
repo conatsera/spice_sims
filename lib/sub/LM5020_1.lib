@@ -1,0 +1,174 @@
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+* (C) National Semiconductor, Corporation.
+* Models developed and under copyright by:
+* National Semiconductor, Corporation.  
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+* Legal Notice:  
+* The model may be copied, and distributed without any modifications;
+* however, reselling or licensing the material is illegal.
+* We reserve the right to make changes to the model without prior notice. 
+* Pspice Models are provided "AS IS, WITH NO WARRANTY OF ANY KIND" 
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+* Model Number 	  : LM5020-1 
+* Last Revision Date : Mar 19, 2010
+* Revision Number    :1.1
+* E-mail feedback 	  : http://wwwd.national.com/feedback/
+* Generated from OrCAD Pspice Ver. 10.5, compatible with Ver. 9.2
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+*Assumptions and limitations;
+*1) Model & Example Assumptions;
+*The temperature for this model is 25C
+*ESR and ESL of capacitors are zero
+*Wire DCR and leakage inductances of transformer are zero
+*No parasitic elements of package
+*2)Some functions/characteristics are not included in this model;
+*Thermal shutdown 
+*Oscillator synchronization 
+*3)Some characteristics are included but not optimized;
+*Gate driver capability 
+*Power consumption of controller  
+*VCC regulator current limit 
+*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+.SUBCKT LM50201 VIN FB COMP VCC OUT SS RT CS UVLO
+
+Sdriverl OUT 0 GL1 0 SWdriverL 
+Sdriverh VCC OUT GH1 0 SWdriverH 
+Cq2 GL1 0  3p IC=0 
+Cq3 GH1 0  3p IC=0 
+Rq2 GH1 GH2  500  
+Rq3 GL1 GL2  500  
+E8 GL2 0 VALUE { if(V(uv1)>2.5 & V(uv2)>2.5 & V(err1)>2.5 & V(maxduty)>2.5,0,5) }
+E6 GH2 0 VALUE { if(V(uv1)>2.5 & V(uv2)>2.5 & V(err1)>2.5 & V(maxduty)>2.5,5,0) }
+
+Rq1 UV2 U1  500  
+Cq1 UV2 0  3p IC=0 
+Rqz1 U3 U2  500  
+Cqz1 U3 0  3p IC=5 
+Rq7 U5 U7  500  
+Cq6 U4 0  3p IC=0 
+Rq6 U4 U6  500  
+Cq7 U5 0  3p IC=0 
+Evccuv1 U6 0 VALUE { if(V(VCC)<6,5,0) }
+Evccuv3 U1 0 VALUE { if(V(U4)>2.5 | V(U3)>2.5,0,5) }
+Evccuv4 U2 0 VALUE { if(V(UV2)>2.5 | V(U5)>2.5,0,5) }
+Evccuv2 U7 0 VALUE { if(V(VCC)>7.5,5,0) }
+
+Rq5 UV1 U8  500  
+Cq5 0 UV1  3p IC=0 
+Guvlohys 0 UVLO VALUE { if(V(uv1)>2.5, 20u, 0) }
+Euvlo U8 0 VALUE { if(V(UVLO)>1.25,5,0) }
+
+Rq ERR1 F3  500  
+Cq ERR1 0  3p IC=0 
+Cqz F2 0  3p IC=5 
+Rqz F2 F4  500  
+Cq4 RESET 0  100p IC=0 
+Rq4 RESET F5  500  
+Ereset F3 0 VALUE { if(V(RESET)>2.5 | V(F2)>2.5,0,5) }
+Ecomp F55 0 VALUE { if(V(csramp)>V(comp2) | V(csramp)>0.5 ,5,0) }
+Eset F4 0 VALUE { if(V(ERR1)>2.5 | V(PULSEDCLKLEB)>2.5,0,5) }
+Dhys F55 F5 D5K
+Rhys RESET 0 5k
+
+Rvcc2 VCC2 VCC3  1  
+Cvcc2 VCC3 0  3p IC=0.77 
+Rvdd1 VDD1 VDD  1  
+Cvdd1 VDD 0  3p IC=0 
+Dvcc VCC4 VCC D5K 
+
+Rvcc3 VCC VCC6 1
+Givcc VCC6 0 TABLE { V(VCC) } ( (0,0) (7.5,0.003) )
+ 
+Dss SS vclamp D5K
+EMAX vclamp 0 VALUE {V(vdd)}
+VRT RT1 RT 0
+Gss 0 SS VALUE { if(V(uv1)<2.5 | V(uv2)<2.5,0, V(vdd)*2E-6) }
+Evcc2 VCC2 0 VALUE { if(V(uv1)>1, V(vcc1), 0.77) }
+Evcc1 VCC1 0 TABLE { V(VIN) } ( (0, 0.77) (4.5, 0.77) (10.8, 8.57) )
+Evdd VDD1 0 TABLE { V(VCC) } ( (5.3,0.0) (7.5,5) )
+Ert RT1 0 TABLE { V(vdd) } ( (0,0) (2,2) )
+Rssdis SS SSdis 200
+Sssdis SSdis 0 ssdiscont 0 S5K
+Rssdis1 ssdiscont ssdiscont1 200
+Cssdis2 ssdiscont 0 3p IC=0
+Essdis ssdiscont1 0 VALUE { if(V(uv1)<2.5 | V(uv2)<2.5, 5,0) }
+Rvddp VDD 0 5E3
+
+Ruvlodummy UVLO 0 10Meg
+Rvindummy VIN 0 192k
+
+VVCC VCC5 VCC4 0
+Ggateloss VIN 0 VALUE {I(VVCC)}
+
+Gldo 0 VCC5 TABLE { V(VCC3,VCC4) } ( (0,0) (0.3,0.02) )
+Cvcc3 VCC5 0  3p IC=0.77 
+
+Cic1 COMP2 0  4.8p IC=0 
+Ric2 COMP2 0  5k  
+Ric3 COMP2 C1  10k  
+Dic4 C2 C1 Dcomp 
+Dic5 COMP C2 Dcomp 
+
+Dic7 vclampgnd COMP D5K 
+Dea2 vclampgnd C4 D5K 
+Eclampgnd vclampgnd 0 TABLE { V(vdd) } ( (0,0) (0.77,0.77) ) 
+
+Ric6 VDD COMP  5k  
+Dic8 COMP C3 D5K 
+Ess C3 0 SS 0 1
+Ggnamp COMP 0 C4 0 0.004
+Dea1 C4 vclamp D5K 
+
+Rbw C4 0  1
+Cbw C4 0  0.0796u IC=0 
+Gea 0 C4 VALUE { if(V(Vdd)>4.5, (V(C12)-V(POS))*200,0) }
+Ereference POS 0 TABLE { V(vdd) } ( (0,0) (1.25,1.25) )
+Rfbd1 C12 0  10Meg  
+Rq11 C12 FB  1  
+Radd CSRAMP CSRAMP1 200
+Ric10 CSRAMP1 CS  2k 
+Cq10 PULSEDCLKLEB 0  3p IC=0 
+Ric11 CS 0  43k  
+Rq10 PULSEDCLKLEB C6  500  
+
+Rq12 MAXDUTY C13  500  
+Cq12 MAXDUTY 0  3p IC=0 
+Ric12 C8 0  1  
+Rq9 C7 C9  500  
+Cq9 C7 0  3p IC=0 
+Cramp RAMP 0  7.9p IC=0 
+
+Gramp1 0 CSRAMP VALUE {V(RAMP)*50E-6} 
+
+Gramp2 0 RAMP VALUE { I(VRT)/40 }
+Eramp3 C10 0 MAXDUTY 0 1
+Sramp RAMP 0 C7 0 S5K
+E13 C9 0 VALUE { if( ( V(MAXDUTY)>4.5 & V(PULSEDCLKLEB)<1 ) ,0,5) }
+Sleb CSRAMP1 0 PULSEDCLKLEB 0 Sleb 
+Eosc1 C6 0 VALUE { if(V(C8)<2.5 & V(MAXDUTY)>2.5,5,0) }
+T1 C8 0 C10 0 Z0=1 TD=50n  
+
+E12 C13 0 VALUE { if(V(OSC)>-0.92,5,0) }
+
+Eosc OSC 0 VALUE { if(V(vdd)>4.5,sin(1.988E10*i(VRT)*TIME),0) }
+
+.MODEL D5K D IS=1E-14 CJO=0 VJ=1
+.MODEL SWdriverH VSWITCH RON=5 ROFF=1MEG VON=1V VOFF=0V
+.MODEL SWdriverL VSWITCH RON=2.6 ROFF=1MEG VON=1V VOFF=0V
+.MODEL S5K VSWITCH RON=1 ROFF=1MEG VON=1V VOFF=0V
+.MODEL Dcomp D IS=1E-20 CJO=0 VJ=1.1
+.MODEL Sleb VSWITCH RON=35 ROFF=1MEG VON=1V VOFF=0V
+.ENDS LM50201
+
+.SUBCKT TX1P2S PDOT P SDOT S AUXDOT AUX PARAMS: NP=1 NS=0.2 NAUX=0.1
+RD PDOT P 1MEG
+GS PDOT P VALUE { I(VS) * NS / NP }
+ES SDOT1 S1 VALUE { V(PDOT,P) * NS / NP }
+VS SDOT1 SDOT 0
+RDS S1 S 0.001
+GAUX PDOT P VALUE { I(VAUX) * NAUX / NP }
+EAUX AUXDOT1 AUX1 VALUE { V(PDOT,P) * NAUX / NP }
+VAUX AUXDOT1 AUXDOT 0
+RDAUX AUX1 AUX 0.001
+.ENDS TX1P2S
